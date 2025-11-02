@@ -1,1 +1,13 @@
-{\n  "name": "丰晟供应链智能看板",\n  "short_name": "丰晟看板",\n  "description": "丰晟供应链智能任务管理与销售统计系统",\n  "start_url": "./",\n  "display": "standalone",\n  "background_color": "#8B0000",\n  "theme_color": "#8B0000",\n  "orientation": "any",\n  "lang": "zh-CN",\n  "dir": "ltr",\n  "scope": "/",\n  "version": "1.0.0",\n  "manifest_version": 2,\n  "icons": [\n    {\n      "src": "icons/icon-192x192.png",\n      "sizes": "192x192",\n      "type": "image/png"\n    },\n    {\n      "src": "icons/icon-512x512.png",\n      "sizes": "512x512",\n      "type": "image/png"\n    }\n  ]\n}
+{
+  "background_color": "#8b0000",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "丰晟供应链智能看板",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "丰晟看板",
+  "start_url": "/",
+  "theme_color": "#8b0000",
+  "id": "fengsheng-kanban",
+  "description": "丰晟供应链智能任务管理与销售统计系统"
+}
