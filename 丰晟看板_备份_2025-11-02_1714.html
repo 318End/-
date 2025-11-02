@@ -1,0 +1,2967 @@
+<html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>丰晟供应链 - 任务看板</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
+            padding: 15px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            margin-bottom: 15px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-left {
+            flex: 1;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .header h1:hover {
+            transform: translateX(2px);
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+        }
+
+        .header-subtitle {
+            font-size: 0.75em;
+            opacity: 0.9;
+            margin-top: 5px;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        .datetime {
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .date {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            align-items: center;
+        }
+
+        /* 三个按钮不同的UI样式 */
+        .btn-add-task {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-add-task:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-add-person {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+
+        .btn-add-person:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 123, 255, 0.4);
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-export:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(108, 117, 125, 0.4);
+        }
+
+        .month-selector {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .month-selector:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .save-status {
+            font-size: 0.85em;
+            color: #90EE90;
+            margin-top: 5px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .nav-tab.active {
+            background: rgba(255, 255, 255, 0.9);
+            color: #8B0000;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #8B0000;
+        }
+
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .category-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .category-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .category-count {
+            background: #8B0000;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        /* 可拖拽调整高度的任务容器 */
+        .tasks-container {
+            min-height: 300px;
+            max-height: 600px;
+            overflow-y: auto;
+            position: relative;
+            resize: vertical;
+            border: 2px solid transparent;
+            transition: border-color 0.3s;
+        }
+
+        .tasks-container:hover {
+            border-color: #dee2e6;
+        }
+
+        .task-card {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid #ddd;
+        }
+
+        .task-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        /* 任务剩余时间颜色 */
+        .task-card.days-green {
+            border-left-color: #28a745;
+            background: linear-gradient(90deg, #f0fff4 0%, white 30%);
+        }
+
+        .task-card.days-yellow {
+            border-left-color: #ffc107;
+            background: linear-gradient(90deg, #fffbeb 0%, white 30%);
+        }
+
+        .task-card.days-red {
+            border-left-color: #dc3545;
+            border-left-width: 5px;
+            background: linear-gradient(90deg, #ffcccc 0%, white 30%);
+            box-shadow: 0 2px 10px rgba(220, 53, 69, 0.25);
+        }
+
+        .task-card.days-overdue {
+            border-left-color: #dc3545;
+            border-left-width: 6px;
+            background: #ffb3b3;
+            box-shadow: 0 3px 12px rgba(220, 53, 69, 0.3);
+        }
+
+        .task-card.days-overdue .task-content {
+            color: #721c24;
+            font-weight: 600;
+        }
+
+        .task-card.days-overdue .task-deadline {
+            color: #721c24 !important;
+            font-weight: bold;
+        }
+
+        .task-card.days-overdue .member-badge {
+            background: rgba(255, 255, 255, 0.8);
+            color: #721c24;
+            border: 1px solid #dc3545;
+        }
+
+        .task-card.days-overdue .member-badge.completed {
+            background: #d4edda;
+            color: #155724;
+            border-color: #28a745;
+        }
+
+        /* 任务内容自动换行 */
+        .task-content {
+            font-size: 16px;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+            word-break: break-word;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .task-members {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .member-badge {
+            background: #e9ecef;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #495057;
+        }
+
+        .member-badge.completed {
+            background: #28a745;
+            color: white;
+        }
+
+        .member-badge.admin {
+            background: #6c757d;
+            color: white;
+        }
+
+        .task-deadline {
+            font-weight: 600;
+        }
+
+        .task-deadline.days-green {
+            color: #28a745;
+        }
+
+        .task-deadline.days-yellow {
+            color: #ffc107;
+        }
+
+        .task-deadline.days-red {
+            color: #dc3545;
+        }
+
+        .task-deadline.days-overdue {
+            color: #8B0000;
+            font-weight: bold;
+        }
+
+        /* 人员完成状态展示 - 在详情弹窗中 */
+        .member-completion {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .member-completion-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 1px solid #e9ecef;
+        }
+
+        .member-completion-item:hover {
+            background: #e9ecef;
+            border-color: #dee2e6;
+        }
+
+        .member-completion-item.completed {
+            background: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .member-completion-checkbox {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            margin: 0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #333;
+            transform: rotate(90deg);
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .member-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+        }
+
+        .member-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .member-checkbox:hover {
+            background: #e9ecef;
+        }
+
+        .member-checkbox input {
+            width: auto;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+        }
+
+        .task-detail-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .task-detail-actions .btn {
+            flex: 1;
+        }
+
+        .ranking-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .ranking-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .rank-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .rank-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .rank-number {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3em;
+            flex-shrink: 0;
+        }
+
+        .rank-1 { 
+            background: linear-gradient(135deg, #FFD700, #FFA500); 
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+        }
+        .rank-2 { 
+            background: linear-gradient(135deg, #C0C0C0, #808080); 
+            color: white;
+            box-shadow: 0 4px 12px rgba(192, 192, 192, 0.4);
+        }
+        .rank-3 { 
+            background: linear-gradient(135deg, #CD7F32, #8B4513); 
+            color: white;
+            box-shadow: 0 4px 12px rgba(205, 127, 50, 0.4);
+        }
+        .rank-other { 
+            background: #e0e0e0; 
+            color: #666; 
+        }
+
+        .rank-info {
+            flex: 1;
+        }
+
+        .rank-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 4px;
+        }
+
+        .rank-stats {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .rank-count {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #8B0000;
+        }
+
+        /* 销售看板样式 */
+        .sales-table {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .sales-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .sales-table th,
+        .sales-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+
+        .sales-table th {
+            background: #8B0000;
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .sales-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .sales-table input {
+            width: 80px;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-good {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* 人员列表样式 */
+        .person-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .person-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .person-name {
+            font-weight: 600;
+        }
+
+        .admin-tag {
+            background: #6c757d;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        .person-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        @media (max-width: 1200px) {
+            .board-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .board-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-actions {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <h1 id="boardTitle" onclick="editBoardTitle()">🚀 丰晟供应链智能看板</h1>
+                <div class="header-subtitle">高效协作 · 清晰追踪 · 快速达成</div>
+            </div>
+            <div class="header-right">
+                <div class="datetime" id="datetime">17:14:19</div>
+                <div class="date" id="date">2025年11月2日星期日</div>
+                <div class="header-actions">
+                    <button class="btn-add-task" onclick="openAddTaskModal()">➕ 添加任务</button>
+                    <button class="btn-add-person" onclick="openAddPersonModal()">👤 添加人员</button>
+                    <button class="btn-export" onclick="exportToHTML()">💾 导出备份</button>
+                    <select class="month-selector" id="monthSelector" onchange="switchMonth()"><option value="current">当前月份 (2025-11)</option></select>
+                </div>
+                <div class="save-status" id="saveStatus">✓ 最后保存: 17:14:19</div>
+            </div>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchPage('tasks')">📋 任务看板</button>
+            <button class="nav-tab" onclick="switchPage('ranking')">🏆 任务排行</button>
+            <button class="nav-tab" onclick="switchPage('sales')">💰 销售看板</button>
+            <button class="nav-tab" onclick="switchPage('analysis')">📊 销售分析</button>
+        </div>
+
+        <!-- 任务看板 -->
+        <div class="page active" id="tasksPage">
+            <div class="stats-bar">
+                <div class="stat-card" onclick="showFilteredTasks('all')">
+                    <div class="stat-label">总任务</div>
+                    <div class="stat-value" id="totalTasks">2</div>
+                </div>
+                <div class="stat-card" onclick="showFilteredTasks('urgent')">
+                    <div class="stat-label">紧急任务</div>
+                    <div class="stat-value" id="urgentTasks">1</div>
+                </div>
+                <div class="stat-card" onclick="showFilteredTasks('important')">
+                    <div class="stat-label">重要任务</div>
+                    <div class="stat-value" id="importantTasks">1</div>
+                </div>
+                <div class="stat-card" onclick="showFilteredTasks('normal')">
+                    <div class="stat-label">普通任务</div>
+                    <div class="stat-value" id="normalTasks">0</div>
+                </div>
+                <div class="stat-card" onclick="showFilteredTasks('completed')">
+                    <div class="stat-label">已完成</div>
+                    <div class="stat-value" id="completedTasks">0</div>
+                </div>
+                <div class="stat-card" onclick="showFilteredTasks('overdue')">
+                    <div class="stat-label">逾期任务</div>
+                    <div class="stat-value" style="color: #dc3545;" id="overdueTasks">0</div>
+                </div>
+            </div>
+
+            <div class="board-grid">
+                <div class="category-section">
+                    <div class="category-header">
+                        <div class="category-title">🔥 紧急</div>
+                        <span class="category-count" id="urgentCount">1</span>
+                    </div>
+                    <div class="tasks-container" id="urgentContainer"><div class="task-card days-green">
+                    <div class="task-content">请于11月15日前将凤球唛孜然粉瓶装全部退回公司。</div>
+                    <div class="task-meta">
+                        <div class="task-members"><span class="member-badge  ">乐文军</span><span class="member-badge  ">陈聪文</span><span class="member-badge  ">赵东明</span><span class="member-badge  ">徐小宾</span><span class="member-badge  ">徐胜龙</span><span class="member-badge  ">洪小青</span><span class="member-badge  ">王政</span><span class="member-badge  ">詹玉财</span></div>
+                        <div class="task-deadline days-green">剩余 13 天</div>
+                    </div>
+                </div></div>
+                </div>
+
+                <div class="category-section">
+                    <div class="category-header">
+                        <div class="category-title">⭐ 重要</div>
+                        <span class="category-count" id="importantCount">1</span>
+                    </div>
+                    <div class="tasks-container" id="importantContainer"><div class="task-card days-green">
+                    <div class="task-content">芝麻官进场照片请本月拍完</div>
+                    <div class="task-meta">
+                        <div class="task-members"><span class="member-badge  ">乐文军</span><span class="member-badge  ">陈聪文</span><span class="member-badge  ">赵东明</span><span class="member-badge  ">徐小宾</span><span class="member-badge  ">徐胜龙</span><span class="member-badge  ">洪小青</span><span class="member-badge  ">王政</span><span class="member-badge  ">詹玉财</span></div>
+                        <div class="task-deadline days-green">剩余 28 天</div>
+                    </div>
+                </div></div>
+                </div>
+
+                <div class="category-section">
+                    <div class="category-header">
+                        <div class="category-title">📝 任务</div>
+                        <span class="category-count" id="normalCount">0</span>
+                    </div>
+                    <div class="tasks-container" id="normalContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务排行 -->
+        <div class="page" id="rankingPage">
+            <div class="ranking-section">
+                <h2 class="ranking-title">🏆 任务完成排行榜</h2>
+                <div id="taskRankingList">
+                    <div class="rank-item">
+                        <div class="rank-number rank-1">
+                            1
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-name">乐文军</div>
+                            <div class="rank-stats">总任务: 2 | 完成率: 0.0%</div>
+                        </div>
+                        <div class="rank-count">0</div>
+                    </div>
+                
+                    <div class="rank-item">
+                        <div class="rank-number rank-2">
+                            2
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-name">陈聪文</div>
+                            <div class="rank-stats">总任务: 2 | 完成率: 0.0%</div>
+                        </div>
+                        <div class="rank-count">0</div>
+                    </div>
+                
+                    <div class="rank-item">
+                        <div class="rank-number rank-3">
+                            3
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-name">赵东明</div>
+                            <div class="rank-stats">总任务: 2 | 完成率: 0.0%</div>
+                        </div>
+                        <div class="rank-count">0</div>
+                    </div>
+                
+                    <div class="rank-item">
+                        <div class="rank-number rank-other">
+                            4
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-name">徐小宾</div>
+                            <div class="rank-stats">总任务: 2 | 完成率: 0.0%</div>
+                        </div>
+                        <div class="rank-count">0</div>
+                    </div>
+                
+                    <div class="rank-item">
+                        <div class="rank-number rank-other">
+                            5
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-name">徐胜龙</div>
+                            <div class="rank-stats">总任务: 2 | 完成率: 0.0%</div>
+                        </div>
+                        <div class="rank-count">0</div>
+                    </div>
+                
+                    <div class="rank-item">
+                        <div class="rank-number rank-other">
+                            6
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-name">洪小青</div>
+                            <div class="rank-stats">总任务: 2 | 完成率: 0.0%</div>
+                        </div>
+                        <div class="rank-count">0</div>
+                    </div>
+                
+                    <div class="rank-item">
+                        <div class="rank-number rank-other">
+                            7
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-name">王政</div>
+                            <div class="rank-stats">总任务: 2 | 完成率: 0.0%</div>
+                        </div>
+                        <div class="rank-count">0</div>
+                    </div>
+                
+                    <div class="rank-item">
+                        <div class="rank-number rank-other">
+                            8
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-name">詹玉财</div>
+                            <div class="rank-stats">总任务: 2 | 完成率: 0.0%</div>
+                        </div>
+                        <div class="rank-count">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 销售看板 -->
+        <div class="page" id="salesPage">
+            <div class="sales-table">
+                <div style="margin-bottom: 15px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                    <label>当前天数: <input type="number" id="currentDay" value="1" min="1" max="31" style="width: 80px;" onchange="calculateSales()"></label>
+                    <label>总天数: <input type="number" id="totalDays" value="30" min="1" max="31" style="width: 80px;" onchange="calculateSales()"></label>
+                    <button class="btn btn-primary" onclick="calculateSales()">🔄 刷新</button>
+                    <button class="btn btn-success" onclick="openSelectSalesMembersModal()">👥 选择成员</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>成员</th>
+                            <th>目标</th>
+                            <th>订单</th>
+                            <th>出货</th>
+                            <th>退货</th>
+                            <th>净销售额</th>
+                            <th>完成率</th>
+                            <th>剩余</th>
+                            <th>日均</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesBody">
+                <tr>
+                    <td style="font-weight: 600;">乐文军</td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('乐文军', 'target', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('乐文军', 'order', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('乐文军', 'outbound', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('乐文军', 'return', this.value)"></td>
+                    <td id="net_乐文军">0</td>
+                    <td id="rate_乐文军">0.0%</td>
+                    <td id="remain_乐文军">260000</td>
+                    <td id="daily_乐文军">9630</td>
+                    <td id="status_乐文军"><span class="status-badge status-danger">需努力</span></td>
+                    <td>
+                        <button class="btn btn-danger" style="padding: 4px 12px; font-size: 12px;" onclick="removeSalesMember('乐文军')">移除</button>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td style="font-weight: 600;">陈聪文</td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('陈聪文', 'target', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('陈聪文', 'order', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('陈聪文', 'outbound', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('陈聪文', 'return', this.value)"></td>
+                    <td id="net_陈聪文">0</td>
+                    <td id="rate_陈聪文">0.0%</td>
+                    <td id="remain_陈聪文">300000</td>
+                    <td id="daily_陈聪文">11111</td>
+                    <td id="status_陈聪文"><span class="status-badge status-danger">需努力</span></td>
+                    <td>
+                        <button class="btn btn-danger" style="padding: 4px 12px; font-size: 12px;" onclick="removeSalesMember('陈聪文')">移除</button>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td style="font-weight: 600;">赵东明</td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('赵东明', 'target', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('赵东明', 'order', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('赵东明', 'outbound', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('赵东明', 'return', this.value)"></td>
+                    <td id="net_赵东明">0</td>
+                    <td id="rate_赵东明">0.0%</td>
+                    <td id="remain_赵东明">280000</td>
+                    <td id="daily_赵东明">10370</td>
+                    <td id="status_赵东明"><span class="status-badge status-danger">需努力</span></td>
+                    <td>
+                        <button class="btn btn-danger" style="padding: 4px 12px; font-size: 12px;" onclick="removeSalesMember('赵东明')">移除</button>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td style="font-weight: 600;">徐小宾</td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('徐小宾', 'target', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('徐小宾', 'order', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('徐小宾', 'outbound', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('徐小宾', 'return', this.value)"></td>
+                    <td id="net_徐小宾">0</td>
+                    <td id="rate_徐小宾">0.0%</td>
+                    <td id="remain_徐小宾">330000</td>
+                    <td id="daily_徐小宾">12222</td>
+                    <td id="status_徐小宾"><span class="status-badge status-danger">需努力</span></td>
+                    <td>
+                        <button class="btn btn-danger" style="padding: 4px 12px; font-size: 12px;" onclick="removeSalesMember('徐小宾')">移除</button>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td style="font-weight: 600;">徐胜龙</td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('徐胜龙', 'target', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('徐胜龙', 'order', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('徐胜龙', 'outbound', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('徐胜龙', 'return', this.value)"></td>
+                    <td id="net_徐胜龙">0</td>
+                    <td id="rate_徐胜龙">0.0%</td>
+                    <td id="remain_徐胜龙">250000</td>
+                    <td id="daily_徐胜龙">9259</td>
+                    <td id="status_徐胜龙"><span class="status-badge status-danger">需努力</span></td>
+                    <td>
+                        <button class="btn btn-danger" style="padding: 4px 12px; font-size: 12px;" onclick="removeSalesMember('徐胜龙')">移除</button>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td style="font-weight: 600;">洪小青</td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('洪小青', 'target', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('洪小青', 'order', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('洪小青', 'outbound', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('洪小青', 'return', this.value)"></td>
+                    <td id="net_洪小青">0</td>
+                    <td id="rate_洪小青">0.0%</td>
+                    <td id="remain_洪小青">250000</td>
+                    <td id="daily_洪小青">9259</td>
+                    <td id="status_洪小青"><span class="status-badge status-danger">需努力</span></td>
+                    <td>
+                        <button class="btn btn-danger" style="padding: 4px 12px; font-size: 12px;" onclick="removeSalesMember('洪小青')">移除</button>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td style="font-weight: 600;">王政</td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('王政', 'target', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('王政', 'order', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('王政', 'outbound', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('王政', 'return', this.value)"></td>
+                    <td id="net_王政">0</td>
+                    <td id="rate_王政">0.0%</td>
+                    <td id="remain_王政">250000</td>
+                    <td id="daily_王政">9259</td>
+                    <td id="status_王政"><span class="status-badge status-danger">需努力</span></td>
+                    <td>
+                        <button class="btn btn-danger" style="padding: 4px 12px; font-size: 12px;" onclick="removeSalesMember('王政')">移除</button>
+                    </td>
+                </tr>
+            
+                <tr>
+                    <td style="font-weight: 600;">詹玉财</td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('詹玉财', 'target', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('詹玉财', 'order', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('詹玉财', 'outbound', this.value)"></td>
+                    <td><input type="number" value="0" onchange="updateSalesValue('詹玉财', 'return', this.value)"></td>
+                    <td id="net_詹玉财">0</td>
+                    <td id="rate_詹玉财">0.0%</td>
+                    <td id="remain_詹玉财">200000</td>
+                    <td id="daily_詹玉财">7407</td>
+                    <td id="status_詹玉财"><span class="status-badge status-danger">需努力</span></td>
+                    <td>
+                        <button class="btn btn-danger" style="padding: 4px 12px; font-size: 12px;" onclick="removeSalesMember('詹玉财')">移除</button>
+                    </td>
+                </tr>
+            </tbody>
+                    <tfoot>
+                        <tr style="background: #f8f9fa; font-weight: bold;">
+                            <td>总计</td>
+                            <td id="totalTarget">2120000</td>
+                            <td id="totalOrder">0</td>
+                            <td id="totalOutbound">0</td>
+                            <td id="totalReturn">0</td>
+                            <td id="totalNet">0</td>
+                            <td id="totalRate">0.0%</td>
+                            <td colspan="4"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- 销售分析 -->
+        <div class="page" id="analysisPage">
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="stat-label">最高完成率</div>
+                    <div class="stat-value" id="maxRate">0.0%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">平均完成率</div>
+                    <div class="stat-value" id="avgRate">0.0%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">达标人数</div>
+                    <div class="stat-value" id="achievedCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">团队总完成率</div>
+                    <div class="stat-value" id="teamRate">0.0%</div>
+                </div>
+            </div>
+
+            <div class="ranking-section">
+                <h2 class="ranking-title">📋 销售排行榜</h2>
+                <div id="salesRankingList">
+                    <div class="rank-item">
+                        <div class="rank-number rank-1">
+                            1
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-name">乐文军</div>
+                            <div class="rank-stats">完成率: 0.0%</div>
+                        </div>
+                        <div class="rank-count">0</div>
+                    </div>
+                
+                    <div class="rank-item">
+                        <div class="rank-number rank-2">
+                            2
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-name">陈聪文</div>
+                            <div class="rank-stats">完成率: 0.0%</div>
+                        </div>
+                        <div class="rank-count">0</div>
+                    </div>
+                
+                    <div class="rank-item">
+                        <div class="rank-number rank-3">
+                            3
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-name">赵东明</div>
+                            <div class="rank-stats">完成率: 0.0%</div>
+                        </div>
+                        <div class="rank-count">0</div>
+                    </div>
+                
+                    <div class="rank-item">
+                        <div class="rank-number rank-other">
+                            4
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-name">徐小宾</div>
+                            <div class="rank-stats">完成率: 0.0%</div>
+                        </div>
+                        <div class="rank-count">0</div>
+                    </div>
+                
+                    <div class="rank-item">
+                        <div class="rank-number rank-other">
+                            5
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-name">徐胜龙</div>
+                            <div class="rank-stats">完成率: 0.0%</div>
+                        </div>
+                        <div class="rank-count">0</div>
+                    </div>
+                
+                    <div class="rank-item">
+                        <div class="rank-number rank-other">
+                            6
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-name">洪小青</div>
+                            <div class="rank-stats">完成率: 0.0%</div>
+                        </div>
+                        <div class="rank-count">0</div>
+                    </div>
+                
+                    <div class="rank-item">
+                        <div class="rank-number rank-other">
+                            7
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-name">王政</div>
+                            <div class="rank-stats">完成率: 0.0%</div>
+                        </div>
+                        <div class="rank-count">0</div>
+                    </div>
+                
+                    <div class="rank-item">
+                        <div class="rank-number rank-other">
+                            8
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-name">詹玉财</div>
+                            <div class="rank-stats">完成率: 0.0%</div>
+                        </div>
+                        <div class="rank-count">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加任务模态框 -->
+    <div class="modal" id="addTaskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">编辑任务</h2>
+                <button class="modal-close" onclick="closeAddTaskModal()">×</button>
+            </div>
+            <div class="form-group">
+                <label>任务内容</label>
+                <textarea id="taskContent" placeholder="请输入任务内容"></textarea>
+            </div>
+            <div class="form-group">
+                <label>截止日期</label>
+                <input type="date" id="taskDeadline">
+            </div>
+            <div class="form-group">
+                <label>任务类别</label>
+                <select id="taskCategory">
+                    <option value="normal">📝 普通任务</option>
+                    <option value="important">⭐ 重要任务</option>
+                    <option value="urgent">🔥 紧急任务</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>负责人（可多选）</label>
+                <div class="member-selector" id="memberSelector">
+                <label class="member-checkbox">
+                    <input type="checkbox" value="乐文军">
+                    <span>乐文军</span>
+                </label>
+            
+                <label class="member-checkbox">
+                    <input type="checkbox" value="陈聪文">
+                    <span>陈聪文</span>
+                </label>
+            
+                <label class="member-checkbox">
+                    <input type="checkbox" value="赵东明">
+                    <span>赵东明</span>
+                </label>
+            
+                <label class="member-checkbox">
+                    <input type="checkbox" value="徐小宾">
+                    <span>徐小宾</span>
+                </label>
+            
+                <label class="member-checkbox">
+                    <input type="checkbox" value="徐胜龙">
+                    <span>徐胜龙</span>
+                </label>
+            
+                <label class="member-checkbox">
+                    <input type="checkbox" value="洪小青">
+                    <span>洪小青</span>
+                </label>
+            
+                <label class="member-checkbox">
+                    <input type="checkbox" value="王政">
+                    <span>王政</span>
+                </label>
+            
+                <label class="member-checkbox">
+                    <input type="checkbox" value="詹玉财">
+                    <span>詹玉财</span>
+                </label>
+            
+                <label class="member-checkbox">
+                    <input type="checkbox" value="管理员">
+                    <span>管理员 👑</span>
+                </label>
+            </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveNewTask()">保存</button>
+                <button class="btn" onclick="closeAddTaskModal()" style="background: #6c757d; color: white;">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 任务详情模态框 -->
+    <div class="modal" id="taskDetailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">任务详情</h2>
+                <button class="modal-close" onclick="closeTaskDetailModal()">×</button>
+            </div>
+            <div id="taskDetailContent">
+                <div class="form-group">
+                    <label>任务内容</label>
+                    <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word; word-break: break-word; line-height: 1.8; font-size: 15px;">34324</div>
+                </div>
+                <div class="form-group">
+                    <label>负责人完成状态</label>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px;"></div>
+                    <div style="margin-top: 10px; padding: 8px; background: #d4edda; color: #155724; border-radius: 6px; text-align: center; font-weight: 600; font-size: 14px;">✓ 所有负责人已完成此任务</div>
+                </div>
+                <div class="form-group">
+                    <label>截止日期</label>
+                    <div style="font-size: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px;">2025-11-30 <span class="task-deadline days-green">(剩余 28 天)</span></div>
+                </div>
+                <div class="form-group">
+                    <label>任务类别</label>
+                    <div style="font-size: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px;">⭐ 重要</div>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>创建时间</label>
+                    <div style="font-size: 14px; color: #666; padding: 10px; background: #f8f9fa; border-radius: 6px;">2025/11/2 00:21:43</div>
+                </div>
+            </div>
+            <div class="task-detail-actions">
+                <button class="btn btn-success" onclick="completeAllTask()">✓ 完成任务</button>
+                <button class="btn btn-primary" onclick="editCurrentTask()">✎ 编辑</button>
+                <button class="btn btn-danger" onclick="deleteCurrentTask()">🗑 删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加人员模态框 -->
+    <div class="modal" id="addPersonModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 class="modal-title">人员管理</h2>
+                <button class="modal-close" onclick="closeAddPersonModal()">×</button>
+            </div>
+            <div class="form-group">
+                <label>添加新人员</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="newPersonName" placeholder="请输入姓名" style="flex: 1;">
+                    <label style="display: flex; align-items: center; gap: 5px; white-space: nowrap;">
+                        <input type="checkbox" id="newPersonIsAdmin">
+                        <span>管理员</span>
+                    </label>
+                    <button class="btn btn-primary" onclick="addNewPerson()">添加</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>现有人员</label>
+                <div id="existingPersonsList" style="max-height: 400px; overflow-y: auto;">
+                <div class="person-item">
+                    <div class="person-info">
+                        <span class="person-name">乐文军</span>
+                        
+                    </div>
+                    <div class="person-actions">
+                        <button class="btn btn-success" style="padding: 4px 12px; font-size: 12px;" onclick="toggleAdmin(0)">
+                            设为管理员
+                        </button>
+                        <button class="btn btn-danger" style="padding: 4px 12px; font-size: 12px;" onclick="removePerson(0)">
+                            删除
+                        </button>
+                    </div>
+                </div>
+            
+                <div class="person-item">
+                    <div class="person-info">
+                        <span class="person-name">陈聪文</span>
+                        
+                    </div>
+                    <div class="person-actions">
+                        <button class="btn btn-success" style="padding: 4px 12px; font-size: 12px;" onclick="toggleAdmin(1)">
+                            设为管理员
+                        </button>
+                        <button class="btn btn-danger" style="padding: 4px 12px; font-size: 12px;" onclick="removePerson(1)">
+                            删除
+                        </button>
+                    </div>
+                </div>
+            
+                <div class="person-item">
+                    <div class="person-info">
+                        <span class="person-name">赵东明</span>
+                        
+                    </div>
+                    <div class="person-actions">
+                        <button class="btn btn-success" style="padding: 4px 12px; font-size: 12px;" onclick="toggleAdmin(2)">
+                            设为管理员
+                        </button>
+                        <button class="btn btn-danger" style="padding: 4px 12px; font-size: 12px;" onclick="removePerson(2)">
+                            删除
+                        </button>
+                    </div>
+                </div>
+            
+                <div class="person-item">
+                    <div class="person-info">
+                        <span class="person-name">徐小宾</span>
+                        
+                    </div>
+                    <div class="person-actions">
+                        <button class="btn btn-success" style="padding: 4px 12px; font-size: 12px;" onclick="toggleAdmin(3)">
+                            设为管理员
+                        </button>
+                        <button class="btn btn-danger" style="padding: 4px 12px; font-size: 12px;" onclick="removePerson(3)">
+                            删除
+                        </button>
+                    </div>
+                </div>
+            
+                <div class="person-item">
+                    <div class="person-info">
+                        <span class="person-name">徐胜龙</span>
+                        
+                    </div>
+                    <div class="person-actions">
+                        <button class="btn btn-success" style="padding: 4px 12px; font-size: 12px;" onclick="toggleAdmin(4)">
+                            设为管理员
+                        </button>
+                        <button class="btn btn-danger" style="padding: 4px 12px; font-size: 12px;" onclick="removePerson(4)">
+                            删除
+                        </button>
+                    </div>
+                </div>
+            
+                <div class="person-item">
+                    <div class="person-info">
+                        <span class="person-name">洪小青</span>
+                        
+                    </div>
+                    <div class="person-actions">
+                        <button class="btn btn-success" style="padding: 4px 12px; font-size: 12px;" onclick="toggleAdmin(5)">
+                            设为管理员
+                        </button>
+                        <button class="btn btn-danger" style="padding: 4px 12px; font-size: 12px;" onclick="removePerson(5)">
+                            删除
+                        </button>
+                    </div>
+                </div>
+            
+                <div class="person-item">
+                    <div class="person-info">
+                        <span class="person-name">王政</span>
+                        
+                    </div>
+                    <div class="person-actions">
+                        <button class="btn btn-success" style="padding: 4px 12px; font-size: 12px;" onclick="toggleAdmin(6)">
+                            设为管理员
+                        </button>
+                        <button class="btn btn-danger" style="padding: 4px 12px; font-size: 12px;" onclick="removePerson(6)">
+                            删除
+                        </button>
+                    </div>
+                </div>
+            
+                <div class="person-item">
+                    <div class="person-info">
+                        <span class="person-name">詹玉财</span>
+                        
+                    </div>
+                    <div class="person-actions">
+                        <button class="btn btn-success" style="padding: 4px 12px; font-size: 12px;" onclick="toggleAdmin(7)">
+                            设为管理员
+                        </button>
+                        <button class="btn btn-danger" style="padding: 4px 12px; font-size: 12px;" onclick="removePerson(7)">
+                            删除
+                        </button>
+                    </div>
+                </div>
+            
+                <div class="person-item">
+                    <div class="person-info">
+                        <span class="person-name">管理员</span>
+                        <span class="admin-tag">管理员</span>
+                    </div>
+                    <div class="person-actions">
+                        <button class="btn btn-primary" style="padding: 4px 12px; font-size: 12px;" onclick="toggleAdmin(8)">
+                            取消管理员
+                        </button>
+                        <button class="btn btn-danger" style="padding: 4px 12px; font-size: 12px;" onclick="removePerson(8)">
+                            删除
+                        </button>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 选择销售看板成员模态框 -->
+    <div class="modal" id="selectSalesMembersModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 class="modal-title">选择销售看板成员</h2>
+                <button class="modal-close" onclick="closeSelectSalesMembersModal()">×</button>
+            </div>
+            <div class="form-group">
+                <label>请选择要在销售看板中显示的成员</label>
+                <div id="salesMembersSelector" class="member-selector"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveSalesMembers()">保存</button>
+                <button class="btn" onclick="closeSelectSalesMembersModal()" style="background: #6c757d; color: white;">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 任务列表模态框 -->
+    <div class="modal" id="taskListModal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="listModalTitle">全部任务</h2>
+                <button class="modal-close" onclick="closeTaskListModal()">×</button>
+            </div>
+            <div id="taskListContent" style="max-height: 60vh; overflow-y: auto;">
+                        <div class="task-card days-green" onclick="openTaskDetail(1762074528686); closeTaskListModal();" style="margin-bottom: 10px;">
+                            <div class="task-content">请于11月15日前将凤球唛孜然粉瓶装全部退回公司。</div>
+                            <div class="task-meta">
+                                <div>🔥 紧急</div>
+                                <div class="task-members"><span class="member-badge  ">乐文军</span><span class="member-badge  ">陈聪文</span><span class="member-badge  ">赵东明</span><span class="member-badge  ">徐小宾</span><span class="member-badge  ">徐胜龙</span><span class="member-badge  ">洪小青</span><span class="member-badge  ">王政</span><span class="member-badge  ">詹玉财</span></div>
+                                <div class="task-deadline days-green">剩余 13 天</div>
+                            </div>
+                        </div>
+                    
+                        <div class="task-card days-green" onclick="openTaskDetail(1762074622198); closeTaskListModal();" style="margin-bottom: 10px;">
+                            <div class="task-content">芝麻官进场照片请本月拍完</div>
+                            <div class="task-meta">
+                                <div>⭐ 重要</div>
+                                <div class="task-members"><span class="member-badge  ">乐文军</span><span class="member-badge  ">陈聪文</span><span class="member-badge  ">赵东明</span><span class="member-badge  ">徐小宾</span><span class="member-badge  ">徐胜龙</span><span class="member-badge  ">洪小青</span><span class="member-badge  ">王政</span><span class="member-badge  ">詹玉财</span></div>
+                                <div class="task-deadline days-green">剩余 28 天</div>
+                            </div>
+                        </div>
+                    </div>
+        </div>
+    </div>
+
+    <script>
+        /* DATA_INJECTION_POINT_START */
+        // 导出时间: 2025/11/2 17:14:19
+        // 这个文件包含所有数据，可以在任何浏览器中打开
+        let injectedData = {
+  "currentMonth": "2025-11",
+  "months": {
+    "2025-11": {
+      "tasks": [
+        {
+          "id": 1762074528686,
+          "content": "请于11月15日前将凤球唛孜然粉瓶装全部退回公司。",
+          "members": [
+            "乐文军",
+            "陈聪文",
+            "赵东明",
+            "徐小宾",
+            "徐胜龙",
+            "洪小青",
+            "王政",
+            "詹玉财"
+          ],
+          "deadline": "2025-11-15",
+          "category": "urgent",
+          "memberCompletion": {
+            "乐文军": false,
+            "陈聪文": false,
+            "赵东明": false,
+            "徐小宾": false,
+            "徐胜龙": false,
+            "洪小青": false,
+            "王政": false,
+            "詹玉财": false
+          },
+          "createdAt": "2025-11-02T09:08:48.686Z"
+        },
+        {
+          "id": 1762074622198,
+          "content": "芝麻官进场照片请本月拍完",
+          "members": [
+            "乐文军",
+            "陈聪文",
+            "赵东明",
+            "徐小宾",
+            "徐胜龙",
+            "洪小青",
+            "王政",
+            "詹玉财"
+          ],
+          "deadline": "2025-11-30",
+          "category": "important",
+          "memberCompletion": {
+            "乐文军": false,
+            "陈聪文": false,
+            "赵东明": false,
+            "徐小宾": false,
+            "徐胜龙": false,
+            "洪小青": false,
+            "王政": false,
+            "詹玉财": false
+          },
+          "createdAt": "2025-11-02T09:10:22.198Z"
+        }
+      ],
+      "salesData": [
+        {
+          "name": "乐文军",
+          "target": 260000,
+          "order": 0,
+          "outbound": 0,
+          "return": 0
+        },
+        {
+          "name": "陈聪文",
+          "target": 300000,
+          "order": 0,
+          "outbound": 0,
+          "return": 0
+        },
+        {
+          "name": "赵东明",
+          "target": 280000,
+          "order": 0,
+          "outbound": 0,
+          "return": 0
+        },
+        {
+          "name": "徐小宾",
+          "target": 330000,
+          "order": 0,
+          "outbound": 0,
+          "return": 0
+        },
+        {
+          "name": "徐胜龙",
+          "target": 250000,
+          "order": 0,
+          "outbound": 0,
+          "return": 0
+        },
+        {
+          "name": "洪小青",
+          "target": 250000,
+          "order": 0,
+          "outbound": 0,
+          "return": 0
+        },
+        {
+          "name": "王政",
+          "target": 250000,
+          "order": 0,
+          "outbound": 0,
+          "return": 0
+        },
+        {
+          "name": "詹玉财",
+          "target": 200000,
+          "order": 0,
+          "outbound": 0,
+          "return": 0
+        }
+      ],
+      "currentDay": 3,
+      "totalDays": 30
+    }
+  },
+  "members": [
+    {
+      "name": "乐文军",
+      "isAdmin": false
+    },
+    {
+      "name": "陈聪文",
+      "isAdmin": false
+    },
+    {
+      "name": "赵东明",
+      "isAdmin": false
+    },
+    {
+      "name": "徐小宾",
+      "isAdmin": false
+    },
+    {
+      "name": "徐胜龙",
+      "isAdmin": false
+    },
+    {
+      "name": "洪小青",
+      "isAdmin": false
+    },
+    {
+      "name": "王政",
+      "isAdmin": false
+    },
+    {
+      "name": "詹玉财",
+      "isAdmin": false
+    },
+    {
+      "name": "管理员",
+      "isAdmin": true
+    }
+  ],
+  "salesMembers": [
+    "乐文军",
+    "陈聪文",
+    "赵东明",
+    "徐小宾",
+    "徐胜龙",
+    "洪小青",
+    "王政",
+    "詹玉财"
+  ],
+  "boardTitle": "🚀 丰晟供应链智能看板",
+  "tasks": [
+    {
+      "id": 1762013304571,
+      "content": "11312321432132132132132121321323213213213232132132132312313213213122132132132131321321321",
+      "assignee": "张三",
+      "deadline": "2025-11-08",
+      "category": "urgent",
+      "completed": true,
+      "createdAt": "2025-11-01T16:08:24.571Z"
+    },
+    {
+      "id": 1762013326381,
+      "content": "23",
+      "assignee": "张三",
+      "deadline": "2025-11-03",
+      "category": "important",
+      "completed": false,
+      "createdAt": "2025-11-01T16:08:46.381Z"
+    },
+    {
+      "id": 1762013395368,
+      "content": "12",
+      "assignee": "李四",
+      "deadline": "2025-11-30",
+      "category": "normal",
+      "completed": false,
+      "createdAt": "2025-11-01T16:09:55.368Z"
+    }
+  ],
+  "salesData": [
+    {
+      "name": "张三",
+      "target": 0,
+      "order": 0,
+      "outbound": 0,
+      "return": 0
+    },
+    {
+      "name": "李四",
+      "target": 0,
+      "order": 0,
+      "outbound": 0,
+      "return": 0
+    },
+    {
+      "name": "王五",
+      "target": 0,
+      "order": 0,
+      "outbound": 0,
+      "return": 0
+    },
+    {
+      "name": "赵六",
+      "target": 0,
+      "order": 0,
+      "outbound": 0,
+      "return": 0
+    },
+    {
+      "name": "钱七",
+      "target": 0,
+      "order": 0,
+      "outbound": 0,
+      "return": 0
+    }
+  ],
+  "currentDay": 1,
+  "totalDays": 30
+};
+        /* DATA_INJECTION_POINT_END */
+        
+        let appData = {
+            currentMonth: getCurrentMonth(),
+            months: {},
+            members: [
+                {name: '张三', isAdmin: false},
+                {name: '李四', isAdmin: false},
+                {name: '王五', isAdmin: false},
+                {name: '赵六', isAdmin: false},
+                {name: '钱七', isAdmin: false}
+            ],
+            salesMembers: [], // 销售看板显示的成员
+            boardTitle: '🚀 丰晟供应链智能看板' // 看板标题
+        };
+        
+        let currentViewMonth = 'current';
+        let currentTask = null;
+
+        function getCurrentMonth() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        function initMonthData() {
+            const month = appData.currentMonth;
+            if (!appData.months[month]) {
+                appData.months[month] = {
+                    tasks: [],
+                    salesData: [],
+                    currentDay: 1,
+                    totalDays: 30
+                };
+            }
+        }
+
+        function getCurrentData() {
+            if (currentViewMonth === 'current') {
+                return appData.months[appData.currentMonth];
+            } else {
+                return appData.months[currentViewMonth];
+            }
+        }
+
+        // 初始化
+        function init() {
+            loadData();
+            initMonthData();
+            renderBoardTitle();
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            updateMonthSelector();
+            renderTasks();
+            renderSales();
+            renderMemberSelector();
+            
+            // 立即执行一次保存以显示状态
+            autoSave();
+            
+            // 自动保存改为30秒
+            setInterval(autoSave, 30000);
+            window.addEventListener('beforeunload', autoSave);
+            
+            // 检查月度切换
+            setInterval(checkMonthChange, 60000);
+        }
+
+        function updateDateTime() {
+            const now = new Date();
+            document.getElementById('datetime').textContent = now.toLocaleTimeString('zh-CN');
+            document.getElementById('date').textContent = now.toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+            });
+        }
+
+        function checkMonthChange() {
+            const newMonth = getCurrentMonth();
+            if (newMonth !== appData.currentMonth) {
+                appData.currentMonth = newMonth;
+                initMonthData();
+                if (currentViewMonth === 'current') {
+                    renderTasks();
+                    renderSales();
+                }
+                updateMonthSelector();
+                saveData();
+            }
+        }
+
+        function updateMonthSelector() {
+            const selector = document.getElementById('monthSelector');
+            const months = Object.keys(appData.months).sort().reverse();
+            selector.innerHTML = '<option value="current">当前月份 (' + appData.currentMonth + ')</option>' +
+                months.filter(m => m !== appData.currentMonth).map(m => 
+                    `<option value="${m}">${m}</option>`
+                ).join('');
+        }
+
+        function switchMonth() {
+            currentViewMonth = document.getElementById('monthSelector').value === 'current' 
+                ? 'current' 
+                : document.getElementById('monthSelector').value;
+            renderTasks();
+            renderSales();
+            renderTaskRanking();
+        }
+
+        // 数据保存 - 增强安全性
+        function saveData() {
+            try {
+                const dataStr = JSON.stringify(appData);
+                
+                // 主存储
+                localStorage.setItem('fengsheng_data', dataStr);
+                
+                // 三重备份
+                localStorage.setItem('fengsheng_backup_1', dataStr);
+                localStorage.setItem('fengsheng_backup_2', dataStr);
+                localStorage.setItem('fengsheng_backup_3', dataStr);
+                
+                // 时间戳备份（用于恢复）
+                const timestamp = new Date().toISOString();
+                localStorage.setItem('fengsheng_last_save', timestamp);
+                
+                // 每小时自动创建一个备份点
+                const currentHour = new Date().getHours();
+                const lastBackupHour = localStorage.getItem('fengsheng_last_backup_hour');
+                if (lastBackupHour !== String(currentHour)) {
+                    localStorage.setItem('fengsheng_hourly_backup', dataStr);
+                    localStorage.setItem('fengsheng_last_backup_hour', String(currentHour));
+                }
+                
+                return true;
+            } catch (e) {
+                console.error('保存失败', e);
+                // 如果localStorage满了，尝试清理旧数据
+                if (e.name === 'QuotaExceededError') {
+                    try {
+                        localStorage.removeItem('fengsheng_backup_3');
+                        localStorage.setItem('fengsheng_data', JSON.stringify(appData));
+                        return true;
+                    } catch (e2) {
+                        console.error('清理后仍保存失败', e2);
+                        return false;
+                    }
+                }
+                return false;
+            }
+        }
+
+        function loadData() {
+            try {
+                // 优先使用注入的数据（从导出的HTML文件中）
+                if (injectedData) {
+                    appData = { ...appData, ...injectedData };
+                    console.log('使用导出文件中的数据');
+                    return;
+                }
+                
+                // 尝试从多个备份源加载
+                const saved = localStorage.getItem('fengsheng_data') || 
+                             localStorage.getItem('fengsheng_backup_1') || 
+                             localStorage.getItem('fengsheng_backup_2') ||
+                             localStorage.getItem('fengsheng_backup_3') ||
+                             localStorage.getItem('fengsheng_hourly_backup');
+                             
+                if (saved) {
+                    const loaded = JSON.parse(saved);
+                    // 兼容旧版本数据
+                    if (loaded.members && loaded.members.length > 0 && typeof loaded.members[0] === 'string') {
+                        loaded.members = loaded.members.map(name => ({name, isAdmin: false}));
+                    }
+                    appData = { ...appData, ...loaded };
+                    
+                    // 如果没有salesMembers，初始化为所有非管理员
+                    if (!appData.salesMembers || appData.salesMembers.length === 0) {
+                        appData.salesMembers = appData.members.filter(m => !m.isAdmin).map(m => m.name);
+                    }
+                    
+                    console.log('数据加载成功，最后保存时间:', localStorage.getItem('fengsheng_last_save'));
+                } else {
+                    console.log('没有找到保存的数据，使用默认数据');
+                }
+            } catch (e) {
+                console.error('加载失败', e);
+                alert('数据加载失败，可能数据损坏。系统将使用默认设置。\n建议：如果您有导出的HTML备份文件，请使用备份文件。');
+            }
+        }
+
+        function autoSave() {
+            if (saveData()) {
+                const now = new Date();
+                document.getElementById('saveStatus').textContent = '✓ 最后保存: ' + now.toLocaleTimeString('zh-CN');
+            } else {
+                document.getElementById('saveStatus').textContent = '✗ 保存失败';
+            }
+        }
+
+        // 导出数据到HTML文件
+        function exportToHTML() {
+            try {
+                // 先保存当前数据
+                saveData();
+                
+                // 获取当前HTML内容
+                let htmlContent = document.documentElement.outerHTML;
+                
+                // 将当前数据序列化为JavaScript代码
+                const dataString = JSON.stringify(appData, null, 2);
+                const injectionCode = `/* DATA_INJECTION_POINT_START */
+        // 导出时间: ${new Date().toLocaleString('zh-CN')}
+        // 这个文件包含所有数据，可以在任何浏览器中打开
+        let injectedData = ${dataString};
+        /* DATA_INJECTION_POINT_END */`;
+                
+                // 替换数据注入点
+                const regex = /\/\* DATA_INJECTION_POINT_START \*\/[\s\S]*?\/\* DATA_INJECTION_POINT_END \*\//;
+                htmlContent = htmlContent.replace(regex, injectionCode);
+                
+                // 创建Blob对象
+                const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+                
+                // 创建下载链接
+                const link = document.createElement('a');
+                const now = new Date();
+                const filename = `丰晟看板_备份_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.html`;
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+                
+                // 触发下载
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 释放URL对象
+                URL.revokeObjectURL(link.href);
+                
+                alert('✓ 数据已成功导出到HTML文件！\n\n文件名: ' + filename + '\n\n此文件包含所有数据，可以在任何电脑、任何浏览器中打开使用。\n请妥善保存此备份文件！');
+            } catch (e) {
+                console.error('导出失败', e);
+                alert('✗ 导出失败: ' + e.message + '\n\n请重试或联系技术支持');
+            }
+        }
+
+        // 页面切换
+        function switchPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(page + 'Page').classList.add('active');
+            event.target.classList.add('active');
+            
+            if (page === 'ranking') renderTaskRanking();
+            if (page === 'analysis') renderSalesAnalysis();
+        }
+
+        // 编辑看板标题
+        function editBoardTitle() {
+            const currentTitle = appData.boardTitle || '🚀 丰晟供应链智能看板';
+            const newTitle = prompt('请输入新的看板标题：', currentTitle);
+            
+            if (newTitle !== null && newTitle.trim() !== '') {
+                appData.boardTitle = newTitle.trim();
+                document.getElementById('boardTitle').textContent = newTitle.trim();
+                saveData();
+            }
+        }
+
+        // 渲染看板标题
+        function renderBoardTitle() {
+            if (appData.boardTitle) {
+                document.getElementById('boardTitle').textContent = appData.boardTitle;
+            }
+        }
+
+        // 人员管理
+        function openAddPersonModal() {
+            renderExistingPersons();
+            document.getElementById('addPersonModal').classList.add('active');
+        }
+
+        function closeAddPersonModal() {
+            document.getElementById('addPersonModal').classList.remove('active');
+        }
+
+        function renderExistingPersons() {
+            const container = document.getElementById('existingPersonsList');
+            container.innerHTML = appData.members.map((member, index) => `
+                <div class="person-item">
+                    <div class="person-info">
+                        <span class="person-name">${member.name}</span>
+                        ${member.isAdmin ? '<span class="admin-tag">管理员</span>' : ''}
+                    </div>
+                    <div class="person-actions">
+                        <button class="btn ${member.isAdmin ? 'btn-primary' : 'btn-success'}" 
+                                style="padding: 4px 12px; font-size: 12px;" 
+                                onclick="toggleAdmin(${index})">
+                            ${member.isAdmin ? '取消管理员' : '设为管理员'}
+                        </button>
+                        <button class="btn btn-danger" 
+                                style="padding: 4px 12px; font-size: 12px;" 
+                                onclick="removePerson(${index})">
+                            删除
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addNewPerson() {
+            const name = document.getElementById('newPersonName').value.trim();
+            const isAdmin = document.getElementById('newPersonIsAdmin').checked;
+            
+            if (!name) {
+                alert('请输入姓名');
+                return;
+            }
+            if (appData.members.some(m => m.name === name)) {
+                alert('该人员已存在');
+                return;
+            }
+            
+            appData.members.push({name, isAdmin});
+            
+            // 如果不是管理员，添加到销售看板成员列表
+            if (!isAdmin && !appData.salesMembers.includes(name)) {
+                appData.salesMembers.push(name);
+            }
+            
+            document.getElementById('newPersonName').value = '';
+            document.getElementById('newPersonIsAdmin').checked = false;
+            renderExistingPersons();
+            renderMemberSelector();
+            renderSales();
+            saveData();
+            alert('添加成功！');
+        }
+
+        function toggleAdmin(index) {
+            const member = appData.members[index];
+            member.isAdmin = !member.isAdmin;
+            
+            // 如果设为管理员，从销售看板移除
+            if (member.isAdmin) {
+                appData.salesMembers = appData.salesMembers.filter(name => name !== member.name);
+            } else if (!appData.salesMembers.includes(member.name)) {
+                // 如果取消管理员，添加到销售看板
+                appData.salesMembers.push(member.name);
+            }
+            
+            renderExistingPersons();
+            renderMemberSelector();
+            renderTasks();
+            renderSales();
+            saveData();
+        }
+
+        function removePerson(index) {
+            if (!confirm('确定删除该人员？删除后将无法恢复。')) {
+                return;
+            }
+            
+            const memberName = appData.members[index].name;
+            appData.members.splice(index, 1);
+            
+            // 从销售看板成员列表移除
+            appData.salesMembers = appData.salesMembers.filter(name => name !== memberName);
+            
+            // 从所有月份中删除该人员的数据
+            Object.keys(appData.months).forEach(month => {
+                appData.months[month].salesData = appData.months[month].salesData.filter(s => s.name !== memberName);
+                
+                // 从任务中移除该人员
+                appData.months[month].tasks.forEach(task => {
+                    task.members = task.members.filter(m => m !== memberName);
+                    if (task.memberCompletion) {
+                        delete task.memberCompletion[memberName];
+                    }
+                });
+            });
+            
+            renderExistingPersons();
+            renderMemberSelector();
+            renderTasks();
+            renderSales();
+            saveData();
+        }
+
+        // 成员选择器
+        function renderMemberSelector() {
+            const container = document.getElementById('memberSelector');
+            container.innerHTML = appData.members.map(m => `
+                <label class="member-checkbox">
+                    <input type="checkbox" value="${m.name}">
+                    <span>${m.name}${m.isAdmin ? ' 👑' : ''}</span>
+                </label>
+            `).join('');
+        }
+
+        function getSelectedMembers() {
+            const checkboxes = document.querySelectorAll('#memberSelector input:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        // 销售看板成员选择
+        function openSelectSalesMembersModal() {
+            renderSalesMembersSelector();
+            document.getElementById('selectSalesMembersModal').classList.add('active');
+        }
+
+        function closeSelectSalesMembersModal() {
+            document.getElementById('selectSalesMembersModal').classList.remove('active');
+        }
+
+        function renderSalesMembersSelector() {
+            const container = document.getElementById('salesMembersSelector');
+            // 只显示非管理员
+            const nonAdminMembers = appData.members.filter(m => !m.isAdmin);
+            container.innerHTML = nonAdminMembers.map(m => `
+                <label class="member-checkbox">
+                    <input type="checkbox" 
+                           value="${m.name}" 
+                           ${appData.salesMembers.includes(m.name) ? 'checked' : ''}>
+                    <span>${m.name}</span>
+                </label>
+            `).join('');
+        }
+
+        function saveSalesMembers() {
+            const checkboxes = document.querySelectorAll('#salesMembersSelector input:checked');
+            appData.salesMembers = Array.from(checkboxes).map(cb => cb.value);
+            
+            // 确保所选成员在salesData中有数据
+            const data = getCurrentData();
+            appData.salesMembers.forEach(memberName => {
+                if (!data.salesData.find(s => s.name === memberName)) {
+                    data.salesData.push({
+                        name: memberName,
+                        target: 0,
+                        order: 0,
+                        outbound: 0,
+                        return: 0
+                    });
+                }
+            });
+            
+            // 移除未选中的成员数据
+            data.salesData = data.salesData.filter(s => appData.salesMembers.includes(s.name));
+            
+            saveData();
+            renderSales();
+            closeSelectSalesMembersModal();
+        }
+
+        // 任务管理
+        function openAddTaskModal() {
+            document.getElementById('taskContent').value = '';
+            document.getElementById('taskDeadline').value = '';
+            document.getElementById('taskCategory').value = 'normal';
+            document.querySelectorAll('#memberSelector input').forEach(cb => cb.checked = false);
+            
+            // 重置标题为"添加任务"
+            document.querySelector('#addTaskModal .modal-title').textContent = '添加任务';
+            
+            // 重置保存按钮
+            const saveButton = document.querySelector('#addTaskModal .btn-primary');
+            saveButton.onclick = saveNewTask;
+            
+            document.getElementById('addTaskModal').classList.add('active');
+        }
+
+        function closeAddTaskModal() {
+            document.getElementById('addTaskModal').classList.remove('active');
+        }
+
+        function saveNewTask() {
+            const content = document.getElementById('taskContent').value.trim();
+            const members = getSelectedMembers();
+            const deadline = document.getElementById('taskDeadline').value;
+            const category = document.getElementById('taskCategory').value;
+
+            if (!content) {
+                alert('请输入任务内容');
+                return;
+            }
+            if (members.length === 0) {
+                alert('请选择至少一个负责人');
+                return;
+            }
+
+            const data = getCurrentData();
+            
+            // 初始化每个成员的完成状态
+            const memberCompletion = {};
+            members.forEach(m => memberCompletion[m] = false);
+            
+            data.tasks.push({
+                id: Date.now(),
+                content: content,
+                members: members,
+                deadline: deadline,
+                category: category,
+                memberCompletion: memberCompletion,
+                createdAt: new Date().toISOString()
+            });
+
+            saveData();
+            renderTasks();
+            closeAddTaskModal();
+            alert('✓ 任务添加成功！');
+        }
+
+        // 计算任务剩余天数
+        function getDaysLeft(deadline) {
+            if (!deadline) return null;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const deadlineDate = new Date(deadline);
+            deadlineDate.setHours(0, 0, 0, 0);
+            const diff = deadlineDate - today;
+            return Math.ceil(diff / (1000 * 60 * 60 * 24));
+        }
+
+        // 获取任务颜色类
+        function getTaskColorClass(deadline) {
+            const daysLeft = getDaysLeft(deadline);
+            if (daysLeft === null) return '';
+            if (daysLeft < 0) return 'days-overdue';
+            if (daysLeft <= 2) return 'days-red';
+            if (daysLeft < 5) return 'days-yellow';
+            return 'days-green';
+        }
+
+        // 获取任务截止日期显示文本
+        function getDeadlineText(deadline) {
+            if (!deadline) return '无截止日期';
+            
+            const daysLeft = getDaysLeft(deadline);
+            if (daysLeft === null) return deadline;
+            
+            if (daysLeft < 0) {
+                return `已逾期 ${-daysLeft} 天`;
+            } else if (daysLeft === 0) {
+                return '今天到期';
+            } else if (daysLeft === 1) {
+                return '明天到期';
+            } else {
+                return `剩余 ${daysLeft} 天`;
+            }
+        }
+
+        // 渲染任务
+        function renderTasks() {
+            const data = getCurrentData();
+            if (!data) return;
+
+            const containers = {
+                urgent: document.getElementById('urgentContainer'),
+                important: document.getElementById('importantContainer'),
+                normal: document.getElementById('normalContainer')
+            };
+
+            Object.values(containers).forEach(c => c.innerHTML = '');
+
+            const stats = {
+                total: 0,
+                urgent: 0,
+                important: 0,
+                normal: 0,
+                completed: 0,
+                overdue: 0
+            };
+
+            data.tasks.forEach(task => {
+                // 检查任务是否全部完成
+                const allCompleted = task.members.every(m => task.memberCompletion && task.memberCompletion[m]);
+                if (allCompleted) {
+                    stats.completed++;
+                    return; // 已完成的任务不显示
+                }
+
+                stats.total++;
+                stats[task.category]++;
+
+                const daysLeft = getDaysLeft(task.deadline);
+                if (daysLeft !== null && daysLeft < 0) {
+                    stats.overdue++;
+                }
+
+                const colorClass = getTaskColorClass(task.deadline);
+                const deadlineText = getDeadlineText(task.deadline);
+
+                const memberBadges = task.members.map(m => {
+                    const isCompleted = task.memberCompletion && task.memberCompletion[m];
+                    const member = appData.members.find(mem => mem.name === m);
+                    const isAdmin = member && member.isAdmin;
+                    return `<span class="member-badge ${isCompleted ? 'completed' : ''} ${isAdmin ? 'admin' : ''}">${m}${isCompleted ? ' ✓' : ''}${isAdmin ? ' 👑' : ''}</span>`;
+                }).join('');
+
+                const card = document.createElement('div');
+                card.className = `task-card ${colorClass}`;
+                card.onclick = () => openTaskDetail(task.id);
+                card.innerHTML = `
+                    <div class="task-content">${task.content}</div>
+                    <div class="task-meta">
+                        <div class="task-members">${memberBadges}</div>
+                        <div class="task-deadline ${colorClass}">${deadlineText}</div>
+                    </div>
+                `;
+
+                containers[task.category].appendChild(card);
+            });
+
+            // 更新统计
+            document.getElementById('totalTasks').textContent = stats.total;
+            document.getElementById('urgentTasks').textContent = stats.urgent;
+            document.getElementById('importantTasks').textContent = stats.important;
+            document.getElementById('normalTasks').textContent = stats.normal;
+            document.getElementById('completedTasks').textContent = stats.completed;
+            document.getElementById('overdueTasks').textContent = stats.overdue;
+
+            document.getElementById('urgentCount').textContent = stats.urgent;
+            document.getElementById('importantCount').textContent = stats.important;
+            document.getElementById('normalCount').textContent = stats.normal;
+        }
+
+        function openTaskDetail(id) {
+            const data = getCurrentData();
+            const task = data.tasks.find(t => t.id === id);
+            if (!task) return;
+            
+            currentTask = task;
+            
+            const daysLeft = getDaysLeft(task.deadline);
+            const colorClass = getTaskColorClass(task.deadline);
+            let deadlineText = task.deadline || '无截止日期';
+            if (daysLeft !== null) {
+                deadlineText += ` <span class="task-deadline ${colorClass}">(${getDeadlineText(task.deadline)})</span>`;
+            }
+            
+            const catMap = {urgent: '🔥 紧急', important: '⭐ 重要', normal: '📝 任务'};
+            
+            // 成员完成状态
+            const memberCompletionHTML = task.members.map(m => {
+                const isCompleted = task.memberCompletion && task.memberCompletion[m];
+                const member = appData.members.find(mem => mem.name === m);
+                const isAdmin = member && member.isAdmin;
+                return `
+                    <label class="member-completion-item ${isCompleted ? 'completed' : ''}" style="user-select: none;">
+                        <input type="checkbox" 
+                               class="member-completion-checkbox" 
+                               ${isCompleted ? 'checked' : ''} 
+                               onchange="toggleMemberCompletion('${m}')">
+                        <span style="font-size: 14px; font-weight: 500;">${m}${isAdmin ? ' 👑' : ''}</span>
+                    </label>
+                `;
+            }).join('');
+
+            // 检查是否全部完成
+            const allCompleted = task.members.every(m => task.memberCompletion && task.memberCompletion[m]);
+            
+            document.getElementById('taskDetailContent').innerHTML = `
+                <div class="form-group">
+                    <label>任务内容</label>
+                    <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word; word-break: break-word; line-height: 1.8; font-size: 15px;">${task.content}</div>
+                </div>
+                <div class="form-group">
+                    <label>负责人完成状态</label>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px;">${memberCompletionHTML}</div>
+                    ${allCompleted ? '<div style="margin-top: 10px; padding: 8px; background: #d4edda; color: #155724; border-radius: 6px; text-align: center; font-weight: 600; font-size: 14px;">✓ 所有负责人已完成此任务</div>' : ''}
+                </div>
+                <div class="form-group">
+                    <label>截止日期</label>
+                    <div style="font-size: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px;">${deadlineText}</div>
+                </div>
+                <div class="form-group">
+                    <label>任务类别</label>
+                    <div style="font-size: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px;">${catMap[task.category]}</div>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>创建时间</label>
+                    <div style="font-size: 14px; color: #666; padding: 10px; background: #f8f9fa; border-radius: 6px;">${new Date(task.createdAt).toLocaleString('zh-CN')}</div>
+                </div>
+            `;
+            
+            document.getElementById('taskDetailModal').classList.add('active');
+        }
+
+        function toggleMemberCompletion(memberName) {
+            if (currentTask) {
+                if (!currentTask.memberCompletion) {
+                    currentTask.memberCompletion = {};
+                }
+                currentTask.memberCompletion[memberName] = !currentTask.memberCompletion[memberName];
+                saveData();
+                renderTasks();
+                // 重新打开详情以更新显示
+                openTaskDetail(currentTask.id);
+            }
+        }
+
+        function completeAllTask() {
+            if (currentTask) {
+                if (!currentTask.memberCompletion) {
+                    currentTask.memberCompletion = {};
+                }
+                // 将所有成员标记为完成
+                currentTask.members.forEach(m => {
+                    currentTask.memberCompletion[m] = true;
+                });
+                saveData();
+                renderTasks();
+                closeTaskDetailModal();
+                alert('✓ 任务已完成！');
+            }
+        }
+
+        function closeTaskDetailModal() {
+            document.getElementById('taskDetailModal').classList.remove('active');
+            currentTask = null;
+        }
+
+        function editCurrentTask() {
+            if (!currentTask) return;
+            
+            const taskToEdit = currentTask;
+            
+            document.getElementById('taskContent').value = taskToEdit.content;
+            document.getElementById('taskDeadline').value = taskToEdit.deadline || '';
+            document.getElementById('taskCategory').value = taskToEdit.category;
+            
+            document.querySelectorAll('#memberSelector input').forEach(cb => {
+                cb.checked = taskToEdit.members.includes(cb.value);
+            });
+            
+            closeTaskDetailModal();
+            
+            // 修改标题为"编辑任务"
+            document.querySelector('#addTaskModal .modal-title').textContent = '编辑任务';
+            
+            document.getElementById('addTaskModal').classList.add('active');
+            
+            // 创建一个新的保存函数用于编辑
+            const editSaveButton = document.querySelector('#addTaskModal .btn-primary');
+            const originalOnClick = editSaveButton.onclick;
+            
+            editSaveButton.onclick = function() {
+                const content = document.getElementById('taskContent').value.trim();
+                const members = getSelectedMembers();
+                const deadline = document.getElementById('taskDeadline').value;
+                const category = document.getElementById('taskCategory').value;
+
+                if (!content) {
+                    alert('请输入任务内容');
+                    return;
+                }
+                if (members.length === 0) {
+                    alert('请选择至少一个负责人');
+                    return;
+                }
+
+                taskToEdit.content = content;
+                taskToEdit.deadline = deadline;
+                taskToEdit.category = category;
+                
+                // 更新成员列表和完成状态
+                taskToEdit.members = members;
+                
+                // 保留旧成员的完成状态，新成员设为未完成
+                const newCompletion = {};
+                members.forEach(m => {
+                    newCompletion[m] = (taskToEdit.memberCompletion && taskToEdit.memberCompletion[m]) || false;
+                });
+                taskToEdit.memberCompletion = newCompletion;
+
+                saveData();
+                renderTasks();
+                closeAddTaskModal();
+                
+                // 恢复原始的保存函数
+                editSaveButton.onclick = originalOnClick;
+                
+                alert('✓ 任务更新成功！');
+            };
+        }
+
+        function deleteCurrentTask() {
+            if (currentTask && confirm('确定删除此任务？')) {
+                const data = getCurrentData();
+                data.tasks = data.tasks.filter(t => t.id !== currentTask.id);
+                saveData();
+                renderTasks();
+                closeTaskDetailModal();
+            }
+        }
+
+        // 任务筛选显示
+        function showFilteredTasks(filter) {
+            const data = getCurrentData();
+            if (!data) return;
+
+            let tasks = [];
+            const catMap = {urgent: '🔥 紧急', important: '⭐ 重要', normal: '📝 任务'};
+            
+            if (filter === 'all') {
+                tasks = data.tasks.filter(task => {
+                    const allCompleted = task.members.every(m => task.memberCompletion && task.memberCompletion[m]);
+                    return !allCompleted;
+                });
+            } else if (filter === 'completed') {
+                tasks = data.tasks.filter(task => {
+                    const allCompleted = task.members.every(m => task.memberCompletion && task.memberCompletion[m]);
+                    return allCompleted;
+                });
+            } else if (filter === 'overdue') {
+                tasks = data.tasks.filter(task => {
+                    const allCompleted = task.members.every(m => task.memberCompletion && task.memberCompletion[m]);
+                    if (allCompleted) return false;
+                    const daysLeft = getDaysLeft(task.deadline);
+                    return daysLeft !== null && daysLeft < 0;
+                });
+            } else {
+                tasks = data.tasks.filter(task => {
+                    const allCompleted = task.members.every(m => task.memberCompletion && task.memberCompletion[m]);
+                    return !allCompleted && task.category === filter;
+                });
+            }
+
+            const filterNames = {
+                all: '全部任务',
+                urgent: '紧急任务',
+                important: '重要任务',
+                normal: '普通任务',
+                completed: '已完成任务',
+                overdue: '逾期任务'
+            };
+
+            document.getElementById('listModalTitle').textContent = filterNames[filter];
+            
+            const content = document.getElementById('taskListContent');
+            if (tasks.length === 0) {
+                content.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">暂无任务</p>';
+            } else {
+                content.innerHTML = tasks.map(task => {
+                    const colorClass = getTaskColorClass(task.deadline);
+                    const deadlineText = getDeadlineText(task.deadline);
+                    
+                    const memberBadges = task.members.map(m => {
+                        const isCompleted = task.memberCompletion && task.memberCompletion[m];
+                        const member = appData.members.find(mem => mem.name === m);
+                        const isAdmin = member && member.isAdmin;
+                        return `<span class="member-badge ${isCompleted ? 'completed' : ''} ${isAdmin ? 'admin' : ''}">${m}${isCompleted ? ' ✓' : ''}${isAdmin ? ' 👑' : ''}</span>`;
+                    }).join('');
+                    
+                    return `
+                        <div class="task-card ${colorClass}" onclick="openTaskDetail(${task.id}); closeTaskListModal();" style="margin-bottom: 10px;">
+                            <div class="task-content">${task.content}</div>
+                            <div class="task-meta">
+                                <div>${catMap[task.category]}</div>
+                                <div class="task-members">${memberBadges}</div>
+                                <div class="task-deadline ${colorClass}">${deadlineText}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            document.getElementById('taskListModal').classList.add('active');
+        }
+
+        function closeTaskListModal() {
+            document.getElementById('taskListModal').classList.remove('active');
+        }
+
+        // 任务排行（排除管理员）
+        function renderTaskRanking() {
+            const data = getCurrentData();
+            if (!data) return;
+
+            const memberStats = {};
+            // 只统计非管理员
+            appData.members.filter(m => !m.isAdmin).forEach(m => {
+                memberStats[m.name] = { total: 0, completed: 0 };
+            });
+
+            data.tasks.forEach(task => {
+                task.members.forEach(memberName => {
+                    if (memberStats[memberName]) {
+                        memberStats[memberName].total++;
+                        if (task.memberCompletion && task.memberCompletion[memberName]) {
+                            memberStats[memberName].completed++;
+                        }
+                    }
+                });
+            });
+
+            const ranking = Object.entries(memberStats)
+                .map(([name, stats]) => ({
+                    name,
+                    completed: stats.completed,
+                    total: stats.total,
+                    rate: stats.total > 0 ? (stats.completed / stats.total * 100).toFixed(1) : 0
+                }))
+                .sort((a, b) => b.completed - a.completed);
+
+            const container = document.getElementById('taskRankingList');
+            if (ranking.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">暂无数据</p>';
+            } else {
+                container.innerHTML = ranking.map((item, index) => `
+                    <div class="rank-item">
+                        <div class="rank-number rank-${index < 3 ? index + 1 : 'other'}">
+                            ${index + 1}
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-name">${item.name}</div>
+                            <div class="rank-stats">总任务: ${item.total} | 完成率: ${item.rate}%</div>
+                        </div>
+                        <div class="rank-count">${item.completed}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // 销售看板
+        function renderSales() {
+            const data = getCurrentData();
+            if (!data) return;
+
+            document.getElementById('currentDay').value = data.currentDay || 1;
+            document.getElementById('totalDays').value = data.totalDays || 30;
+
+            // 确保salesData包含所有salesMembers
+            appData.salesMembers.forEach(memberName => {
+                if (!data.salesData.find(s => s.name === memberName)) {
+                    data.salesData.push({
+                        name: memberName,
+                        target: 0,
+                        order: 0,
+                        outbound: 0,
+                        return: 0
+                    });
+                }
+            });
+
+            // 只显示salesMembers中的成员
+            const displayData = data.salesData.filter(s => appData.salesMembers.includes(s.name));
+
+            const tbody = document.getElementById('salesBody');
+            tbody.innerHTML = displayData.map(member => `
+                <tr>
+                    <td style="font-weight: 600;">${member.name}</td>
+                    <td><input type="number" value="${member.target}" onchange="updateSalesValue('${member.name}', 'target', this.value)"></td>
+                    <td><input type="number" value="${member.order}" onchange="updateSalesValue('${member.name}', 'order', this.value)"></td>
+                    <td><input type="number" value="${member.outbound}" onchange="updateSalesValue('${member.name}', 'outbound', this.value)"></td>
+                    <td><input type="number" value="${member.return}" onchange="updateSalesValue('${member.name}', 'return', this.value)"></td>
+                    <td id="net_${member.name}">0</td>
+                    <td id="rate_${member.name}">0%</td>
+                    <td id="remain_${member.name}">0</td>
+                    <td id="daily_${member.name}">0</td>
+                    <td id="status_${member.name}"></td>
+                    <td>
+                        <button class="btn btn-danger" style="padding: 4px 12px; font-size: 12px;" onclick="removeSalesMember('${member.name}')">移除</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            calculateSales();
+        }
+
+        function removeSalesMember(memberName) {
+            if (!confirm(`确定从销售看板移除 ${memberName}？`)) {
+                return;
+            }
+            appData.salesMembers = appData.salesMembers.filter(name => name !== memberName);
+            saveData();
+            renderSales();
+        }
+
+        function updateSalesValue(memberName, field, value) {
+            const data = getCurrentData();
+            const member = data.salesData.find(m => m.name === memberName);
+            if (member) {
+                member[field] = parseFloat(value) || 0;
+                calculateSales();
+                saveData();
+            }
+        }
+
+        function calculateSales() {
+            const data = getCurrentData();
+            if (!data) return;
+
+            data.currentDay = parseInt(document.getElementById('currentDay').value) || 1;
+            data.totalDays = parseInt(document.getElementById('totalDays').value) || 30;
+
+            let totals = {
+                target: 0,
+                order: 0,
+                outbound: 0,
+                return: 0,
+                net: 0
+            };
+
+            const displayData = data.salesData.filter(s => appData.salesMembers.includes(s.name));
+
+            displayData.forEach(member => {
+                const net = member.outbound - member.return;
+                const rate = member.target > 0 ? (net / member.target * 100).toFixed(1) : 0;
+                const remain = member.target - net;
+                const remainDays = data.totalDays - data.currentDay;
+                const daily = remainDays > 0 ? (remain / remainDays).toFixed(0) : 0;
+
+                document.getElementById(`net_${member.name}`).textContent = net.toFixed(0);
+                document.getElementById(`rate_${member.name}`).textContent = rate + '%';
+                document.getElementById(`remain_${member.name}`).textContent = remain.toFixed(0);
+                document.getElementById(`daily_${member.name}`).textContent = daily;
+
+                let statusHTML = '';
+                if (rate >= 100) {
+                    statusHTML = '<span class="status-badge status-good">已达标</span>';
+                } else if (rate >= 80) {
+                    statusHTML = '<span class="status-badge status-warning">接近目标</span>';
+                } else {
+                    statusHTML = '<span class="status-badge status-danger">需努力</span>';
+                }
+                document.getElementById(`status_${member.name}`).innerHTML = statusHTML;
+
+                totals.target += member.target;
+                totals.order += member.order;
+                totals.outbound += member.outbound;
+                totals.return += member.return;
+                totals.net += net;
+            });
+
+            const totalRate = totals.target > 0 ? (totals.net / totals.target * 100).toFixed(1) : 0;
+
+            document.getElementById('totalTarget').textContent = totals.target.toFixed(0);
+            document.getElementById('totalOrder').textContent = totals.order.toFixed(0);
+            document.getElementById('totalOutbound').textContent = totals.outbound.toFixed(0);
+            document.getElementById('totalReturn').textContent = totals.return.toFixed(0);
+            document.getElementById('totalNet').textContent = totals.net.toFixed(0);
+            document.getElementById('totalRate').textContent = totalRate + '%';
+
+            saveData();
+        }
+
+        // 销售分析（排除管理员）
+        function renderSalesAnalysis() {
+            const data = getCurrentData();
+            if (!data) return;
+
+            // 只分析salesMembers中的成员
+            const displayData = data.salesData.filter(s => appData.salesMembers.includes(s.name));
+
+            const rates = displayData.map(member => {
+                const net = member.outbound - member.return;
+                return member.target > 0 ? (net / member.target * 100) : 0;
+            });
+
+            const maxRate = rates.length > 0 ? Math.max(...rates).toFixed(1) : 0;
+            const avgRate = rates.length > 0 ? (rates.reduce((a, b) => a + b, 0) / rates.length).toFixed(1) : 0;
+            const achievedCount = rates.filter(r => r >= 100).length;
+            
+            const totalTarget = displayData.reduce((sum, m) => sum + m.target, 0);
+            const totalNet = displayData.reduce((sum, m) => sum + (m.outbound - m.return), 0);
+            const teamRate = totalTarget > 0 ? (totalNet / totalTarget * 100).toFixed(1) : 0;
+
+            document.getElementById('maxRate').textContent = maxRate + '%';
+            document.getElementById('avgRate').textContent = avgRate + '%';
+            document.getElementById('achievedCount').textContent = achievedCount;
+            document.getElementById('teamRate').textContent = teamRate + '%';
+
+            // 销售排行
+            const ranking = displayData.map(member => {
+                const net = member.outbound - member.return;
+                const rate = member.target > 0 ? (net / member.target * 100).toFixed(1) : 0;
+                return { name: member.name, net, rate };
+            }).sort((a, b) => b.net - a.net);
+
+            const container = document.getElementById('salesRankingList');
+            if (ranking.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">暂无数据</p>';
+            } else {
+                container.innerHTML = ranking.map((item, index) => `
+                    <div class="rank-item">
+                        <div class="rank-number rank-${index < 3 ? index + 1 : 'other'}">
+                            ${index + 1}
+                        </div>
+                        <div class="rank-info">
+                            <div class="rank-name">${item.name}</div>
+                            <div class="rank-stats">完成率: ${item.rate}%</div>
+                        </div>
+                        <div class="rank-count">${item.net.toFixed(0)}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // 启动应用
+        window.onload = init;
+    </script>
+
+</body></html>
