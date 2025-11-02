@@ -4,9 +4,9 @@
   "display": "standalone",
   "name": "丰晟供应链智能看板",
   "orientation": "any",
-  "scope": "/",
+  "scope": "/318End/-/",
   "short_name": "丰晟看板",
-  "start_url": "/",
+  "start_url": "/318End/-/",
   "theme_color": "#8b0000",
   "id": "fengsheng-kanban",
   "description": "丰晟供应链智能任务管理与销售统计系统"
